@@ -1,20 +1,13 @@
-<!-- arquivo index.html-->
-<html>
-    <head>
-        <title> Nave com Objeto</title>
-        <meta charset="utf-8"/>
-        <script src="script.js"></script>
-    </head>
-    <body>
-        <canvas id="canv" width="800"height="600">
-            Este browser não suporta objeto canvas html5
-        </canvas>
-        <script>
-            canvas=document.getElementById("canv");
-            ctx=canvas.getContext("2d");
-            imgNave=new Image();
-            imgNave.src="image.png";
-            imgNave.onload=criaNave;
-        </script>
-    </body>
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Nave com Objeto</title>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <canvas id="canv" width="800" height="600">
+        Este browser não suporta objeto canvas html5
+    </canvas>
+</body>
 </html>
