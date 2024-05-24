@@ -45,7 +45,7 @@
     }
 
     function criaNave() {
-         nave = new Sprite(ctx, imgNave, canvas.width / 2 - imgNave.width / 2, canvas.height - imgNave.height / 20, 10);
+         nave = new Sprite(ctx, imgNave, canvas.width / 2 - imgNave.width / 2, canvas.height - imgNave.height,20);
         nave.desenhar();
 
         document.addEventListener("keydown", function(evento) {
