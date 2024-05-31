@@ -1,4 +1,3 @@
-
 var canvas = document.getElementById("canv");
 var ctx = canvas.getContext("2d");
 
@@ -12,50 +11,49 @@ var posY = 0;
 imgFundo.onload = animaFundo;
 
 var velocidade = 1;
-var nave; 
+var nave;
+var naveInimiga;
+var imgNaveInimiga = new Image();
+imgNaveInimiga.src = "img/naveInimigo.png";
+imgNaveInimiga.onload = criaNaveInimiga;
 
+var escalaNave = 0.7; // Escala da nave principal
+var escalaNaveInimiga = 0.7; // Escala da nave inimiga
 
-
-function Sprite(contexto, imagem, x, y, deslocamento) {
+function Sprite(contexto, imagem, x, y, deslocamento, escala) {
     this.contexto = contexto;
     this.imagem = imagem;
     this.x = x;
     this.y = y;
     this.deslocamento = deslocamento;
-    this.largura = this.imagem.width;
-    this.altura = this.imagem.height;
+    this.largura = this.imagem.width * escala;
+    this.altura = this.imagem.height * escala;
 
     this.desenhar = function() {
-        this.contexto.drawImage(this.imagem, this.x, this.y +90, this.largura - 100, this.altura - 100);
+        this.contexto.drawImage(this.imagem, this.x, this.y, this.largura, this.altura);
     };
 
     this.direita = function() {
-        if (this.x-120 < this.contexto.canvas.width - this.largura - this.deslocamento) {
+        if (this.x + this.deslocamento < this.contexto.canvas.width - this.largura) {
             this.x += this.deslocamento;
         }
     };
 
     this.esquerda = function() {
-        if (this.x-15 >= 0) {
+        if (this.x - this.deslocamento >= 0) {
             this.x -= this.deslocamento;
-        }
-    };
-
-    /*this.subir = function() {
-        if (this.y -  > 0) {
-            this.y -= this.deslocamento;
-        }
-    };*/
-
-    this.descer = function() {
-        if (this.y - 280  <= this.contexto.canvas.height - this.altura - this.deslocamento) {
-            this.y += this.deslocamento;
         }
     };
 }
 
+function criaNaveInimiga() {
+    naveInimiga = new Sprite(ctx, imgNaveInimiga, canvas.width / 2 - imgNaveInimiga.width * escalaNaveInimiga / 2, 0, 0, escalaNaveInimiga);
+    desenhaFundo();
+    naveInimiga.desenhar();
+}
+
 function criaNave() {
-    nave = new Sprite(ctx, imgNave, canvas.width / 2 - imgNave.width / 2, canvas.height - imgNave.height, 20);
+    nave = new Sprite(ctx, imgNave, canvas.width / 2 - imgNave.width * escalaNave / 2, canvas.height - imgNave.height * escalaNave, 20, escalaNave);
 
     document.addEventListener("keydown", function(evento) {
         var tecla = evento.key;
@@ -63,15 +61,12 @@ function criaNave() {
             nave.esquerda();
         } else if (tecla === "ArrowRight") {
             nave.direita();
-        } 
-        /*else if (tecla === "ArrowUp") {
-            nave.subir();
-        } else if (tecla === "ArrowDown") {
-            nave.descer();
-        }*/
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         desenhaFundo();
         nave.desenhar();
+        if (naveInimiga) naveInimiga.desenhar(); // Desenha a nave inimiga, se existir
     });
 }
 
@@ -79,6 +74,7 @@ function animaFundo() {
     atualizaFundo();
     desenhaFundo();
     if (nave) nave.desenhar(); // Desenha a nave após desenhar o fundo
+    if (naveInimiga) naveInimiga.desenhar(); // Desenha a nave inimiga após desenhar o fundo
     requestAnimationFrame(animaFundo);
 }
 
@@ -101,5 +97,3 @@ function desenhaFundo() {
     ctx.drawImage(imgFundo, 0, y1, canvas.width, canvas.height);
     ctx.drawImage(imgFundo, 0, y2, canvas.width, canvas.height);
 }
-
-
