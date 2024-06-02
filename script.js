@@ -5,6 +5,9 @@ var imgNave = new Image();
 imgNave.src = "img/nave.png";
 imgNave.onload = criaNave;
 
+var explosao = new Image();
+explosao.src = "img/explosao.png";
+
 var imgFundo = new Image();
 imgFundo.src = "img/praia.jpg";
 var posY = 0;
@@ -12,13 +15,16 @@ imgFundo.onload = animaFundo;
 
 var velocidade = 1;
 var nave;
-var naveInimiga;
+var navesInimigas = []; // Array para múltiplas naves inimigas
 var imgNaveInimiga = new Image();
 imgNaveInimiga.src = "img/naveInimigo.png";
-imgNaveInimiga.onload = criaNaveInimiga;
+imgNaveInimiga.onload = criaNavesInimigas;
 
 var escalaNave = 0.7; // Escala da nave principal
 var escalaNaveInimiga = 0.7; // Escala da nave inimiga
+var velocidadeInimiga = 2; // Velocidade da nave inimiga
+
+var explosoes = []; // Array para armazenar explosões
 
 function Sprite(contexto, imagem, x, y, deslocamento, escala) {
     this.contexto = contexto;
@@ -44,12 +50,24 @@ function Sprite(contexto, imagem, x, y, deslocamento, escala) {
             this.x -= this.deslocamento;
         }
     };
+
+    this.baixo = function() {
+        if (this.y + velocidadeInimiga < this.contexto.canvas.height) {
+            this.y += velocidadeInimiga;
+        } else {
+            this.y = -this.altura; // Reinicia a posição da nave inimiga
+            this.x = Math.random() * (this.contexto.canvas.width - this.largura); // Novo x aleatório
+        }
+    };
 }
 
-function criaNaveInimiga() {
-    naveInimiga = new Sprite(ctx, imgNaveInimiga, canvas.width / 2 - imgNaveInimiga.width * escalaNaveInimiga / 2, 0, 0, escalaNaveInimiga);
-    desenhaFundo();
-    naveInimiga.desenhar();
+function criaNavesInimigas() {
+    for (var i = 0; i < 5; i++) { // Ajuste o número de naves inimigas conforme necessário
+        var x = Math.random() * (canvas.width - imgNaveInimiga.width * escalaNaveInimiga);
+        var y = Math.random() * -canvas.height; // Posição inicial acima do canvas
+        var naveInimiga = new Sprite(ctx, imgNaveInimiga, x, y, 0, escalaNaveInimiga);
+        navesInimigas.push(naveInimiga);
+    }
 }
 
 function criaNave() {
@@ -65,8 +83,41 @@ function criaNave() {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         desenhaFundo();
-        nave.desenhar();
-        if (naveInimiga) naveInimiga.desenhar(); // Desenha a nave inimiga, se existir
+        if (nave) nave.desenhar();
+        desenhaNavesInimigas();
+    });
+}
+
+function colidiu(nave, inimigo) {
+    return (
+        nave.x < inimigo.x + inimigo.largura &&
+        nave.x + nave.largura > inimigo.x &&
+        nave.y < inimigo.y + inimigo.altura &&
+        nave.y + nave.altura > inimigo.y
+    );
+}
+
+function desenhaNavesInimigas() {
+    navesInimigas.forEach(function(naveInimiga) {
+        naveInimiga.baixo();
+        naveInimiga.desenhar();
+        if (nave && colidiu(nave, naveInimiga)) {
+
+            
+            // Adiciona a explosão na posição da nave
+            explosoes.push({x: nave.x, y: nave.y});
+            nave = null; // Remove a nave principal se houver colisão
+
+            // Remove a explosão após um tempo
+            setTimeout(function() {
+                explosoes.shift();
+            }, 500); // 500 ms para desaparecer a explosão
+        }
+    });
+
+    // Desenha as explosões
+    explosoes.forEach(function(explosaoPos) {
+        ctx.drawImage(explosao, explosaoPos.x-115, explosaoPos.y-180, (explosao.width-600) * escalaNave, (explosao.height-600) * escalaNave);
     });
 }
 
@@ -74,7 +125,7 @@ function animaFundo() {
     atualizaFundo();
     desenhaFundo();
     if (nave) nave.desenhar(); // Desenha a nave após desenhar o fundo
-    if (naveInimiga) naveInimiga.desenhar(); // Desenha a nave inimiga após desenhar o fundo
+    desenhaNavesInimigas(); // Desenha e atualiza as naves inimigas
     requestAnimationFrame(animaFundo);
 }
 
