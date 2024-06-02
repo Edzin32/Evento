@@ -11,6 +11,7 @@ explosao.src = "img/explosao.png";
 var imgFundo = new Image();
 imgFundo.src = "img/praia.jpg";
 var posY = 0;
+var animacaoFundo; // Variável para controlar a animação do fundo
 imgFundo.onload = animaFundo;
 
 var velocidade = 1;
@@ -59,6 +60,11 @@ function Sprite(contexto, imagem, x, y, deslocamento, escala) {
             this.x = Math.random() * (this.contexto.canvas.width - this.largura); // Novo x aleatório
         }
     };
+
+    this.desparo=function(){
+        this.contexto.fillStyle = "red"; 
+        this.contexto.fillReact(this.x,this.y,500,500)
+    }
 }
 
 function criaNavesInimigas() {
@@ -79,6 +85,8 @@ function criaNave() {
             nave.esquerda();
         } else if (tecla === "ArrowRight") {
             nave.direita();
+        }else if(tecla==="spacear"){
+            nave.disparo();
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -102,8 +110,6 @@ function desenhaNavesInimigas() {
         naveInimiga.baixo();
         naveInimiga.desenhar();
         if (nave && colidiu(nave, naveInimiga)) {
-
-            
             // Adiciona a explosão na posição da nave
             explosoes.push({x: nave.x, y: nave.y});
             nave = null; // Remove a nave principal se houver colisão
@@ -112,6 +118,8 @@ function desenhaNavesInimigas() {
             setTimeout(function() {
                 explosoes.shift();
             }, 500); // 500 ms para desaparecer a explosão
+            
+            pararAnimacaoFundo(); // Chama a função para parar a animação do fundo
         }
     });
 
@@ -126,7 +134,7 @@ function animaFundo() {
     desenhaFundo();
     if (nave) nave.desenhar(); // Desenha a nave após desenhar o fundo
     desenhaNavesInimigas(); // Desenha e atualiza as naves inimigas
-    requestAnimationFrame(animaFundo);
+    animacaoFundo = requestAnimationFrame(animaFundo); // Continua a animação do fundo
 }
 
 function atualizaFundo() {
@@ -147,4 +155,8 @@ function desenhaFundo() {
     // Desenha o fundo repetido
     ctx.drawImage(imgFundo, 0, y1, canvas.width, canvas.height);
     ctx.drawImage(imgFundo, 0, y2, canvas.width, canvas.height);
+}
+
+function pararAnimacaoFundo() {
+    cancelAnimationFrame(animacaoFundo); // Para a animação do fundo
 }
