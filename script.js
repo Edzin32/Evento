@@ -26,6 +26,7 @@ var escalaNaveInimiga = 0.7; // Escala da nave inimiga
 var velocidadeInimiga = 2; // Velocidade da nave inimiga
 
 var explosoes = []; // Array para armazenar explosões
+var tiros = []; // Array para armazenar os tiros
 
 function Sprite(contexto, imagem, x, y, deslocamento, escala) {
     this.contexto = contexto;
@@ -61,9 +62,8 @@ function Sprite(contexto, imagem, x, y, deslocamento, escala) {
         }
     };
 
-    this.desparo=function(){
-        this.contexto.fillStyle = "red"; 
-        this.contexto.fillReact(this.x,this.y,500,500)
+    this.disparo = function() {
+        tiros.push({x: this.x + this.largura / 2 - 2.5, y: this.y - 10, largura: 5, altura: 10});
     }
 }
 
@@ -85,7 +85,7 @@ function criaNave() {
             nave.esquerda();
         } else if (tecla === "ArrowRight") {
             nave.direita();
-        }else if(tecla==="spacear"){
+        } else if (tecla === " ") { // Detecta a tecla "Espaço"
             nave.disparo();
         }
 
@@ -93,9 +93,20 @@ function criaNave() {
         desenhaFundo();
         if (nave) nave.desenhar();
         desenhaNavesInimigas();
+        
     });
 }
 
+function colidiuDesparo(tiros, inimigo) {
+    return tiros.some(function(tiro) {
+        return (
+            tiro.x < inimigo.x + inimigo.largura &&
+            tiro.x + tiro.largura > inimigo.x &&
+            tiro.y < inimigo.y + inimigo.altura &&
+            tiro.y + tiro.altura > inimigo.y
+        );
+    });
+}
 function colidiu(nave, inimigo) {
     return (
         nave.x < inimigo.x + inimigo.largura &&
@@ -121,20 +132,53 @@ function desenhaNavesInimigas() {
             
             pararAnimacaoFundo(); // Chama a função para parar a animação do fundo
         }
+        if(tiros&&colidiuDesparo(tiros,naveInimiga)){
+            explosoes.push({x: naveInimiga.x, y: naveInimiga.y});
+            
+            naveInimiga.x=null;
+            setTimeout(function() {
+                explosoes.shift();
+            }, 300); 
+        }
     });
 
     // Desenha as explosões
     explosoes.forEach(function(explosaoPos) {
-        ctx.drawImage(explosao, explosaoPos.x-115, explosaoPos.y-180, (explosao.width-600) * escalaNave, (explosao.height-600) * escalaNave);
+        ctx.drawImage(explosao, explosaoPos.x - 115, explosaoPos.y - 180, (explosao.width - 600) * escalaNave, (explosao.height - 600) * escalaNave);
+    });
+}
+
+function desenhaTiros() {
+    tiros.forEach(function(tiro, index) {
+        ctx.fillStyle = "Black";
+        ctx.fillRect(tiro.x, tiro.y, tiro.largura, tiro.altura);
+        tiro.y -= 5; // Velocidade do tiro
+
+        // Remove o tiro se sair da tela
+        if (tiro.y < 0) {
+            tiros.splice(index, 1);
+        }
     });
 }
 
 function animaFundo() {
-    atualizaFundo();
-    desenhaFundo();
-    if (nave) nave.desenhar(); // Desenha a nave após desenhar o fundo
-    desenhaNavesInimigas(); // Desenha e atualiza as naves inimigas
-    animacaoFundo = requestAnimationFrame(animaFundo); // Continua a animação do fundo
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
+
+    if (velocidade !== null) {
+        atualizaFundo();
+        desenhaFundo();
+        if (nave) nave.desenhar(); // Desenha a nave após desenhar o fundo
+        desenhaNavesInimigas(); // Desenha e atualiza as naves inimigas
+        desenhaTiros(); // Desenha os tiros
+        requestAnimationFrame(animaFundo); // Continua a animação do fundo
+    } else {
+        desenhaFundo();
+        desenhaNavesInimigas(); // Garantir que as naves inimigas e explosões sejam desenhadas
+        desenhaTiros(); // Garantir que os tiros sejam desenhados
+        ctx.font = "48px serif";
+        ctx.fillStyle = "Blue";
+        ctx.fillText("FIM DE JOGO!", canvas.width / 2 - 150, canvas.height / 2);
+    }
 }
 
 function atualizaFundo() {
@@ -158,5 +202,10 @@ function desenhaFundo() {
 }
 
 function pararAnimacaoFundo() {
-    cancelAnimationFrame(animacaoFundo); // Para a animação do fundo
+    velocidadeInimiga = null;
+    velocidade = null;
+}
+
+function apagaSprite(){
+    ctx.clearRect()
 }
