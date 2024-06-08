@@ -28,6 +28,21 @@ var velocidadeInimiga = 2; // Velocidade da nave inimiga
 var explosoes = []; // Array para armazenar explosões
 var tiros = []; // Array para armazenar os tiros
 
+var somTiro=new Audio()
+somTiro.src="tiro.mp3"
+somTiro.volume=0.2
+somTiro.load()
+
+var somExp=new Audio()
+somExp.src="explosao.mp3"
+somExp.volume=0.2
+somExp.load()
+
+var somAcao=new Audio()
+somAcao.src="musica-acao.mp3"
+somAcao.volume=0.2
+somAcao.load()
+
 function Sprite(contexto, imagem, x, y, deslocamento, escala) {
     this.contexto = contexto;
     this.imagem = imagem;
@@ -109,9 +124,9 @@ function colidiuDesparo(tiros, inimigo) {
 }
 function colidiu(nave, inimigo) {
     return (
-        nave.x < inimigo.x + inimigo.largura &&
+        nave.x+50 < inimigo.x + inimigo.largura &&
         nave.x + nave.largura > inimigo.x &&
-        nave.y < inimigo.y + inimigo.altura &&
+        nave.y+50 < inimigo.y + inimigo.altura &&
         nave.y + nave.altura > inimigo.y
     );
 }
@@ -206,6 +221,4 @@ function pararAnimacaoFundo() {
     velocidade = null;
 }
 
-function apagaSprite(){
-    ctx.clearRect()
-}
+
