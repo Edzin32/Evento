@@ -147,8 +147,10 @@ function desenhaNavesInimigas() {
             somExp.play();
             explosoes.push({ x: nave.x, y: nave.y });
             nave = null;
+            
 
-
+            somTiro.currentTime = 1.0;
+            somAcao.pause();
             setTimeout(function () {
                 explosoes.shift();
             }, 500);
@@ -229,8 +231,7 @@ function desenhaFundo() {
 function pararAnimacaoFundo() {
     velocidadeInimiga = null;
     velocidade = null;
-    somTiro.currentTime = 1.0;
-    somAcao.pause();
+    
 }
 
 
